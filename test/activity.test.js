@@ -1,13 +1,13 @@
 
 import 'mocha'
 import { expect, should } from 'chai'
+import mongoose from 'mongoose'
 import Activity from '../server/models/activity'
-import { connexionString } from './config'
 
 describe('Activity', () => {
     describe('Crear Actividad', () => {
         mongoose.Promise = global.Promise;
-        mongoose.connect(connexionString)
+        mongoose.connect("mongodb://localhost:27017/test")
         mongoose.connection.on('error', console.error)
         it('Should create an activity with all the fields', () => {
             const activity = new Activity({ date: Date.now(), state: "Planeado", capacity: 10 })
