@@ -1,45 +1,118 @@
-
 import 'mocha'
-import { expect, should } from 'chai'
+import { expect, assert } from 'chai'
+import "chai/register-should"
 import Activity from '../models/activity'
 import initTest from './test_helper'
+import mongoose from 'mongoose'
 
 initTest();
 
 describe('Activity', () => {
-    describe('Crear Actividad', () => {
-        it('Should create an activity with all the fields', () => {
-            const activity = new Activity({ date: Date.now(), capacity: 10 })
-            activity.save().then(()=>{
-              console.log(activity)
-              expect(activity.capacity).to.equal(10);
-            })
-        });
-        it('No debe crear la actividad cuando no se especifica fecha');
-        it('No debe crear la actividad cuando la fecha no es de tipo Date');
-        it('No debe crear la actividad cuando no se especifica # personas');
-        it('No debe crear la actividad cuando el numero de personas no es de tipo entero');
-      })
-    describe('Modificar Actividad', () => {
-      describe('Modificar # personas', () => {
-        it('No debe dejar modificar si el valor es diferente a un numero');
-        it('El valor numerico no debe de ser menor o igual a 0');
-      })
-      describe('Modificar Estado', () => {
-        it('No debe cambiar el estado a terminado si no llega a la fecha del evento');
-        it('No debe cambiar el estado a progreso si no llega a la fecha del evento');
-        it('El estado no debe cambiar una ves se encuentre en terminado');
-      })
-      describe('Agregar persona a la actividad', ()=>{
-        it('No debe dejar agregar cuando la cantidad de personas es mayor al limite');
-      })
-      describe('Eliminar persona de la actividad', ()=>{
-        it('Debe eliminar a la persona del arreglo de personas en actividades');
-      })
+    describe('Create Activity', () => {
+      it('Should create an activity with all the fields', () => {
+          const activity = new Activity({ date: Date.now(), state: "Planeado", capacity: 10 })
+          activity.save((err, doc)=>{
+            should.not.exist(err);
+            should.exist(doc);
+            doc.should.be.an('object');
+          })
+      });
+      it('Should not create the activity without date', ()=>{
+        const activity = new Activity({ state: "Planeado", capacity: 10 })
+          activity.save((err, doc) => {
+            should.exist(err);
+            expect(err.message).to.equal('Activity validation failed: date: Path `date` is required.');
+            should.not.exist(doc);
+          })
+      });
+      it('Should not create the activity without date being of Date type', ()=>{
+        const activity = new Activity({ date: "estonoesundate", state: "Planeado", capacity: 10 })
+        activity.save((err, doc) => {
+          should.exist(err);
+          expect(err.message).to.equal('Activity validation failed: date: Cast to Date failed for value "estonoesundate" at path "date"');
+          should.not.exist(doc);
+        })
+      });
+      it('Should not create the activity without specifying a capacity number', ()=>{
+        const activity = new Activity({ date: Date.now(), state: "Planeado"})
+          activity.save((err, doc) => {
+            should.exist(err);
+            expect(err.message).to.equal('Activity validation failed: capacity: Path `capacity` is required.');
+            should.not.exist(doc);
+          })
+      });
+    })
+    describe('Modify Activity', () => {
+      let activity;
+      beforeEach((done) => {
+        activity = new Activity({ date: Date.now(), state: "Terminado", capacity: 10 });
+        activity.save()
+          .then(() => done());
+      });
+      it('Should not modify capacity number if value is less or equal than 0',()=>{
+        activity.set('capacity', -1)
+        activity.save((err, doc)=>{
+          should.exist(err);
+          expect(err.message).to.equal('Activity validation failed: capacity: Path `capacity` (-1) is less than minimum allowed value (1).');
+          should.not.exist(doc);
+        })
+      });
+      it('Should add a person to the attending array', () => {
+        var person = mongoose.Types.ObjectId('4edd40c86762e0fb12000003');
+        activity.peopleAttending.push(person)
+        activity.save((err,doc)=>{
+          should.not.exist(err)
+          expect(doc.peopleAttending).to.have.lengthOf(1)
+        })
+      });
+      it('Should only let a person register if capacity is below limit', () => {
+        var person1 = mongoose.Types.ObjectId('4edd40c86762e0fb12000003');
+        activity.set('capacity', 1)
+        activity.peopleAttending.push(person1)
+        if(activity.capacity >= activity.peopleAttending.length){
+          activity.save((err, doc)=>{
+            expect(doc.capacity).to.be.equal(1);
+          });
+        }else{
+          assert.fail("Capacity is less than people attending length")
+        }
+      });
     })
     describe('Eliminar Actividad', () => {
-      it('No debe eliminar una actividad en estado "En progreso"');
-      it('Debe eliminar una actividad agendada');
-      it('Debe notificar a las personas registradas que se elimino la actividad');
+      let activity;
+      beforeEach((done) => {
+        activity = new Activity({ date: Date.now(), state: "Planeado", capacity: 15 });
+        activity.save()
+          .then(() => done());
+      });
+      it('Should not delete an activity that is "En Progreso"', ()=>{
+        if(activity.state !== "En progreso"){
+          activity.remove()
+            .then(()=>Activity.findOne({state: "Planeada"}))
+            .then((activity)=>{
+              should.not.exist(activity)
+            })
+        }else{
+          assert.fail("Cannot delete an activity that is in 'En Progreso'")
+        }
+      });
+      it('Should delete an activity that exist on the agenda',()=>{
+        activity.remove()
+          .then(()=>Activity.findOne({state: "Planeada"}))
+          .then((activity)=>{
+            should.not.exist(activity)
+        })
+      });
+      it('Should delete an activity and find all attendees', () => {
+        var person1 = mongoose.Types.ObjectId('4edd40c86762e0fb12000003');
+        activity.peopleAttending.push(person1)
+        var arrayPeople = activity.peopleAttending;
+        activity.remove()
+          .then(()=>Activity.findOne({state: "Planeada"}))
+          .then((activity)=>{
+            should.not.exist(activity)
+        })
+        expect(arrayPeople.length).to.equal(1);
+      });
     })
   });
