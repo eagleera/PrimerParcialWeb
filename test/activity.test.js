@@ -3,16 +3,16 @@ import 'mocha'
 import { expect, should } from 'chai'
 import mongoose from 'mongoose'
 import Activity from '../models/activity'
+import initTest from './test_helper'
+initTest();
 
 describe('Activity', () => {
     describe('Crear Actividad', () => {
-        mongoose.Promise = global.Promise;
-        mongoose.connect("mongodb://localhost:27017/test")
-        mongoose.connection.on('error', console.error)
         it('Should create an activity with all the fields', () => {
-            const activity = new Activity({ date: Date.now(), state: "Planeado", capacity: 10 })
+            const activity = new Activity({ date: Date.now(), capacity: 10 })
             activity.save().then(()=>{
-                console.log("simon")
+              console.log(activity)
+              expect(activity.capacity).to.equal(10);
             })
         });
         it('No debe crear la actividad cuando no se especifica fecha');
