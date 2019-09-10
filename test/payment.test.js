@@ -36,14 +36,17 @@ describe('Payments',()=>{
       }
     })
     it.only('Should not create if amount is not double',()=>{
-      const payment = new Payment({user:mongoose.Types.ObjectId(), amount:'123.123,', description:'Pago de casona'})
-      payment.save((err, payment)=>{
-        if(err){
-          return assert.isNotOk(false,'Tiene que fallar')
-        }else{
-          return assert.ok(payment)
-        }
-      })
+      const payment = new Payment({user:mongoose.Types.ObjectId(), amount:'hola', description:'Pago de casona'})
+      console.log(payment.amount);
+      // payment.save((err, payment)=>{
+      //   if(err){
+      //     console.log('entro')
+      //     return assert.isNotOk(false,'Tiene que fallar')
+      //   }else{
+      //     console.log('lo guardo')
+      //     return assert.ok(payment)
+      //   }
+      // })
     })
   })
   describe('delete',()=>{
