@@ -1,0 +1,19 @@
+{
+  "name": "primerparcialweb",
+  "version": "1.0.0",
+  "description": "Pa sacarlo con el koa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eagleera/PrimerParcialWeb.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eagleera/PrimerParcialWeb/issues"
+  },
+  "homepage": "https://github.com/eagleera/PrimerParcialWeb#readme"
+}
