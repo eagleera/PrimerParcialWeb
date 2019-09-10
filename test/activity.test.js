@@ -2,7 +2,7 @@
 import 'mocha'
 import { expect, should } from 'chai'
 import mongoose from 'mongoose'
-import Activity from '../server/models/activity'
+import Activity from '../models/activity'
 
 describe('Activity', () => {
     describe('Crear Actividad', () => {
