@@ -12,6 +12,9 @@ const initTest = () =>{
         mongoose.connection.collections.activities.drop(() => {
             done();
         });
+        mongoose.connection.collections.payments.drop(() => {
+            done();
+        });
     });
 }
 export default initTest;
