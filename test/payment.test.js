@@ -13,8 +13,9 @@ describe('Payments',()=>{
       payment.save((err, payment)=>{
         if(err){
           return assert.fail()
+        }else{
+          return assert.ok(payment)
         }
-        return assert.ok(payment)
       })
     });
     it('Should exist the user', ()=>{
@@ -27,14 +28,22 @@ describe('Payments',()=>{
         const payment = new Payment({user:user_id, amount:123.123, description:'Pago de casona'})
         payment.save((err, payment)=>{
           if(err){
-            return assert.fail()
+            return assert.fail('No funciono')
+          }else{
+            return assert.ok(payment)
           }
-          return assert.ok(payment)
         })
       }
     })
     it('Should not create if amount is not double',()=>{
-
+      const payment = new Payment({user:mongoose.Types.ObjectId(), amount:'123.123,', description:'Pago de casona'})
+      payment.save((err, payment)=>{
+        if(err){
+          return assert.isNotOk(false,'Tiene que fallar')
+        }else{
+          return assert.ok(payment)
+        }
+      })
     })
   })
   describe('delete',()=>{
