@@ -49,7 +49,7 @@ describe('Payments',()=>{
     })
   })
   describe('readme',()=>{
-    it('Return all payments user is admin',()=>{
+    it('Return all payments user is admin', ()=>{
       let payments = Payment.find({},(err, payments)=>{
         return assert.ok(payments)
       })
