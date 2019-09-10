@@ -35,7 +35,7 @@ describe('Payments',()=>{
         })
       }
     })
-    it('Should not create if amount is not double',()=>{
+    it.only('Should not create if amount is not double',()=>{
       const payment = new Payment({user:mongoose.Types.ObjectId(), amount:'123.123,', description:'Pago de casona'})
       payment.save((err, payment)=>{
         if(err){
