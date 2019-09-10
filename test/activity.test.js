@@ -1,6 +1,6 @@
 
 import 'mocha'
-import { expect, should } from 'chai'
+import { expect, should, assert } from 'chai'
 import mongoose from 'mongoose'
 import Activity from '../models/activity'
 import initTest from './test_helper'
@@ -14,7 +14,7 @@ describe('Activity', () => {
               console.log(activity)
               expect(activity.capacity).to.equal(10);
             })
-        });
+        })
         it('No debe crear la actividad cuando no se especifica fecha');
         it('No debe crear la actividad cuando la fecha no es de tipo Date');
         it('No debe crear la actividad cuando no se especifica # personas');
