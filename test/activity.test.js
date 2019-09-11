@@ -2,47 +2,76 @@ import 'mocha'
 import { expect, assert } from 'chai'
 import "chai/register-should"
 import Activity from '../models/activity'
-import initTest from './test_helper'
+// import initTest from './test_helper'
 import mongoose from 'mongoose'
 
-initTest();
+// initTest();
 
 describe('Activity', () => {
-    describe('Create Activity', () => {
-      it('Should create an activity with all the fields', () => {
-          const activity = new Activity({ date: Date.now(), state: "Planeado", capacity: 10 })
-          activity.save((err, doc)=>{
-            should.not.exist(err);
-            should.exist(doc);
-            doc.should.be.an('object');
-          })
+    describe('Displays the activity', () => {
+      let activity;
+      before(() => {
+        activity = new Activity({
+            date: Date.now(),
+            state: "Planeado",
+            capacity: 10,
+            peopleAttending: [{ name: "Daniel", age: 22}]
+        });
       });
-      it('Should not create the activity without date', ()=>{
-        const activity = new Activity({ state: "Planeado", capacity: 10 })
-          activity.save((err, doc) => {
-            should.exist(err);
-            expect(err.message).to.equal('Activity validation failed: date: Path `date` is required.');
-            should.not.exist(doc);
-          })
+      it('Should check remaining places', () => {
+        let result = activity.getRemainingPlaces();
+        expect(result).to.be.a("number")
+        expect(result).to.equal(9)
       });
-      it('Should not create the activity without date being of Date type', ()=>{
-        const activity = new Activity({ date: "estonoesundate", state: "Planeado", capacity: 10 })
-        activity.save((err, doc) => {
-          should.exist(err);
-          expect(err.message).to.equal('Activity validation failed: date: Cast to Date failed for value "estonoesundate" at path "date"');
-          should.not.exist(doc);
-        })
+      it('Should show current state', ()=>{
+        let result = activity.getState();
+        expect(result).to.equal("Planeado")
+        expect(result).to.be.a("string")
       });
-      it('Should not create the activity without specifying a capacity number', ()=>{
-        const activity = new Activity({ date: Date.now(), state: "Planeado"})
-          activity.save((err, doc) => {
-            should.exist(err);
-            expect(err.message).to.equal('Activity validation failed: capacity: Path `capacity` is required.');
-            should.not.exist(doc);
-          })
+      it('Should show all the people attending', ()=>{
+        let result = activity.getAttendants();
+        expect(result).to.have.lengthOf(1)
+        expect(result).to.be.an('array')
       });
     })
-    describe('Modify Activity', () => {
+    describe('Handling users', ()=>{
+      it('Should add a user if the remaining places are more than 0', () => {
+        let activity = new Activity({
+          date: Date.now(),
+          state: "Planeado",
+          capacity: 2,
+          peopleAttending: [{ name: "Daniel", age: 22}]
+        });
+        const user = { name: "Jaime", age: 22}
+        let result = activity.addUser(user)
+        expect(result.peopleAttending).to.have.lengthOf(2)
+        expect(result.peopleAttending).include(user)
+      });
+      it('Should not add a user when state is "En progreso"', () => {
+        let activity = new Activity({
+          date: Date.now(),
+          state: "En progreso",
+          capacity: 2,
+          peopleAttending: [{ name: "Daniel", age: 22}]
+        });
+        const user = { name: "Jaime", age: 22}
+        expect(()=>{activity.addUser(user)}).to.throw(Error)
+      });
+    })
+    describe('Creates Activity',()=>{
+      it('Should verify that date is not older than today', ()=>{
+        var d = new Date();
+        d.setDate(d.getDate() - 1);
+        let activity = new Activity({
+          date: d,
+          state: "En progreso",
+          capacity: 2,
+          peopleAttending: [{ name: "Daniel", age: 22}]
+        });
+        expect(()=>{activity.verifyDate()}).to.throw(Error)
+      });
+    })
+    describe.skip('Modify Activity', () => {
       let activity;
       beforeEach((done) => {
         activity = new Activity({ date: Date.now(), state: "Terminado", capacity: 10 });
@@ -78,7 +107,7 @@ describe('Activity', () => {
         }
       });
     })
-    describe('Eliminar Actividad', () => {
+    describe.skip('Eliminar Actividad', () => {
       let activity;
       beforeEach((done) => {
         activity = new Activity({ date: Date.now(), state: "Planeado", capacity: 15 });
