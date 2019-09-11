@@ -16,25 +16,6 @@ class ActivityClass {
   constructor() {
   }
 
-  getRemainingPlaces(){
-    var remainingPlaces = 0;
-    if(this.capacity > this.peopleAttending.length){
-      remainingPlaces = this.capacity - this.peopleAttending.length;
-    }
-    return remainingPlaces;
-  }
-  getState(){
-    if(this.state){
-      return this.state
-    }
-    throw new Error("State not defined")
-  }
-  getAttendants(){
-    if(this.peopleAttending){
-      return this.peopleAttending
-    }
-    throw new Error("PeopleAttending not defined")
-  }
   addUser(user){
     const remainingPlaces = this.getRemainingPlaces()
     const state = this.getState()
@@ -47,6 +28,48 @@ class ActivityClass {
     this.peopleAttending.push(user)
     return this;
   }
+
+  clear(){
+    if(this.state == "En progreso"){
+      throw new Error("Cannot delete an activity in progress")
+    }
+    this.peopleAttending.forEach(person => {
+      //ESTA FUNCIÓN ES DE LA PERSONA
+      person.notifyDelete()
+    });
+    return null;
+  }
+
+  getAttendants(){
+    if(this.peopleAttending){
+      return this.peopleAttending
+    }
+    throw new Error("PeopleAttending not defined")
+  }
+
+  getRemainingPlaces(){
+    var remainingPlaces = 0;
+    if(this.capacity > this.peopleAttending.length){
+      remainingPlaces = this.capacity - this.peopleAttending.length;
+    }
+    return remainingPlaces;
+  }
+
+  getState(){
+    if(this.state){
+      return this.state
+    }
+    throw new Error("State not defined")
+  }
+
+  setCapacity(capacity){
+    if(capacity <= 0 || typeof capacity !== "number"){
+      throw new Error("Capacity needs to be a number and bigger than 0")
+    }
+    this.capacity = capacity;
+    return this;
+  }
+  
   verifyDate(){
     var today = new Date(Date.now()).toLocaleString();
     var date = new Date(this.date).toLocaleString();
