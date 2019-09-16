@@ -1,91 +1,97 @@
 import 'mocha'
 import { expect, should, assert } from 'chai'
 import mongoose from 'mongoose'
-import Payment from '../models/payment'
-import User from '../models/users'
+import Payment from '../models/paymentModel'
+import User from '../models/UserModel'
 import initTest from './test_helper'
+import payment_controller from '../controller/paymentController'
+const paymentCtr = new payment_controller.payment_controller()
 initTest();
 
-describe('Payments',()=>{
+describe.only('Payments',()=>{
+
   describe('create',()=>{
-    it('Should create a payment',()=>{
-      const payment = new Payment({user:mongoose.Types.ObjectId(), amount:123.123, description:'Pago de casona', status:false})
-      payment.save((err, payment)=>{
-        if(err){
-          return assert.fail()
-        }else{
-          return assert.ok(payment)
-        }
-      })
-    });
-    it('Should exist the user', ()=>{
-      const user_id = 'hola'
-      const user = User.findById(user_id)
-      if (user.user == null){
-        const mensaje = 'El usuario no existe'
-        return assert.equal(mensaje, 'El usuario no existe','Exito no se continuo con creacion de pago ')
-      }else{
-        const payment = new Payment({user:user_id, amount:123.123, description:'Pago de casona', status:false})
-        payment.save((err, payment)=>{
-          if(err){
-            return assert.fail('No funciono')
-          }else{
-            return assert.ok(payment)
-          }
-        })
-      }
+
+    it('Should exist the user', async ()=>{
+      const payment = new Payment({
+        user:mongoose.Types.ObjectId(),
+        amount:123.123,
+        description:'Pago de casona',
+        status:false})
+      const response = await payment.validate_user(payment.user)
+      expect(response).to.be.equal(false)
     })
-    it('Should not create if amount is not double',()=>{
-      const payment = new Payment(hola)
-      payment.save((err, payment)=>{
-        if(err){
-          console.log('entro')
-          return assert.isNotOk(false,'Tiene que fallar')
-        }else{
-          console.log('lo guardo')
-          return assert.ok(payment)
-        }
-      })
+
+    it('Should not create if amount is number',()=>{
+      const payment = new Payment({
+        user:mongoose.Types.ObjectId(),
+        amount:123.12,
+        description:'Pago de casona',
+        status:false})
+      expect(payment.validate_amount(payment.amount)).to.be.true
+    })
+
+    it('Should create a payment',async ()=>{
+      const payment = new Payment({
+        user:mongoose.Types.ObjectId("5d7fc57ade43390a55b67185"),
+        amount:123.123,
+        description:'Pago de casona',
+        status:false})
+      const response = await payment.validate_payment()
+      expect(response).to.be.true
     })
   })
+
   describe('readme',()=>{
-    it('Return all payments user is admin', ()=>{
-      let payments = Payment.find({},(err, payments)=>{
-        return assert.ok(payments)
-      })
+
+    it('Return all payments user is admin',async ()=>{
+      const user = mongoose.Types.ObjectId("5d7fc57ade43390a55b67185")
+      const response = await paymentCtr.get_all_payments(user)
+      expect(response).to.be.false
     })
-    it('Return your payments',()=>{
-      let payments = Payment.find({user:mongoose.Type.ObjectId()},(payments)=>{
-        return assert.ok(payments)
-      })
+
+    it('Return your payments',async ()=>{
+      const user = mongoose.Types.ObjectId("5d7fc57ade43390a55b67185")
+      const response = await paymentCtr.get_my_payments(user)
+      expect(response).to.deep.equal([])
     })
+
   })
+
   describe('update',()=>{
-    it('You Cannot',()=>{
-      console.log('Not posible');
+
+    it('Only admin',async ()=>{
+      const user = mongoose.Types.ObjectId("5d7fe420af5977298ee1fd22")
+      const response = await paymentCtr.update_access(user)
+      expect(response).to.be.true
     })
+
   })
+
   describe('delete',()=>{
-    it('Only an admin',()=>{
-      const user_id = function get_user(){
-        return mongoose.Types.ObjectId()
-      }
-      Payment.findByIdAndRemove(user_id)
+
+    it('Only an admin',async ()=>{
+      const user = mongoose.Types.ObjectId("5d7fc57ade43390a55b67185")
+      const payment = mongoose.Types.ObjectId("5d7733576c4d582b4f1ebdba")
+      const response = await paymentCtr.delete_payment(user, payment)
+      expect(response).to.be.false
     })
-    it('Cannot delete if payment status is not done',()=>{
-      Payment.findById(id, (err, payment)=>{
-        if (payment.status == false){
-          return assert.isNotOk(false,'Has to fail')
-        }
-      })
+
+    it('Cannot delete if payment status is not done',async ()=>{
+      const user = mongoose.Types.ObjectId("5d7fe420af5977298ee1fd22")
+      const payment = mongoose.Types.ObjectId("5d7733cc92c23e2bc166a1a4")
+      const response = await paymentCtr.delete_payment(user, payment)
+      expect(response).to.deep.equal({'error':'Status not done'})
     })
-    it('delete when status is done',()=>{
-      Payment.findById(id, (err, payment)=>{
-        if (payment.status == true){
-          Payment.findByIdAndRemove(id)
-          return assert.ok(payment)
-        }
-      })
+
+    it.only('delete when status is done',async ()=>{
+      //use create_example_payment if need
+      const user = mongoose.Types.ObjectId("5d7fe420af5977298ee1fd22")
+      const payment = await paymentCtr.create_example_payment()
+      const response = await paymentCtr.delete_payment(user, payment)
+      expect(response).to.deep.equal({'00':'Delete true'})
+
     })
+
   })
 })

@@ -69,7 +69,7 @@ class ActivityClass {
     this.capacity = capacity;
     return this;
   }
-  
+
   verifyDate(){
     var today = new Date(Date.now()).toLocaleString();
     var date = new Date(this.date).toLocaleString();
