@@ -8,10 +8,13 @@ const initTest = () =>{
         .on('error', (error) => {
             console.warn('Error : ',error);
         });
-    beforeEach((done) => {
-        mongoose.connection.collections.activities.drop(() => {
-            done();
-        });
-    });
+    // beforeEach((done) => {
+    //     mongoose.connection.collections.activities.drop(() => {
+    //         done();
+    //     });
+    //     mongoose.connection.collections.payments.drop(() => {
+    //         done();
+    //     });
+    // });
 }
 export default initTest;
