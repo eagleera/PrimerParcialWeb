@@ -19,7 +19,7 @@
     "koa-router": "^7.2.1",
     "koa-static": "^3.0.0",
     "koa-views": "^6.0.2",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "mongoose": "^5.7.0",
     "pug": "~2.0.0-beta11"
   },
@@ -31,7 +31,7 @@
     "@babel/register": "^7.6.0",
     "babel-eslint": "7.1.1",
     "eslint": "3.18.0",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "nodemon": "^1.19.2"
   }
 }
